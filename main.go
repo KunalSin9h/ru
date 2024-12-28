@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -72,6 +73,14 @@ func main() {
 		Short: "Parse problems, contests and run test.",
 	}
 
+	var configCmd = &cobra.Command{
+		Use:   "config",
+		Short: "Setup compilation options",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return configSetup()
+		},
+	}
+
 	var parseCmd = &cobra.Command{
 		Use:   "parse",
 		Short: "Parse a problem",
@@ -83,10 +92,14 @@ func main() {
 	var testCmd = &cobra.Command{
 		Use:   "test",
 		Short: "Run tests",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return testProblem()
+		},
 	}
 
 	rootCmd.AddCommand(parseCmd)
 	rootCmd.AddCommand(testCmd)
+	rootCmd.AddCommand(configCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
@@ -136,5 +149,37 @@ func createProblem(problem Problem) error {
 	}
 
 	fmt.Println("✔️")
+	return nil
+}
+
+func testProblem() error {
+	return nil
+}
+
+func configSetup() error {
+	fmt.Print("Paste your c++ compile command: ")
+
+	reader := bufio.NewReader(os.Stdin)
+	cmd, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+
+	home := os.Getenv("HOME")
+	configDir := fmt.Sprintf("%s/.config/ru.conf", home)
+
+	//os.Stat(configDir)
+	// create file
+	f, err := os.Create(configDir)
+	if err != nil {
+		return err
+	}
+
+	_, err = f.WriteString(cmd)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("C++ compilation command saved to: %s\n", configDir)
 	return nil
 }
