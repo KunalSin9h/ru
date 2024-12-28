@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 type Test struct {
@@ -18,38 +21,80 @@ type Problem struct {
 	Tests []Test `json:"tests"`
 }
 
+func startServerAndParse() error {
+	done := make(chan bool)
+
+	server := &http.Server{
+		Addr: ":6174",
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			data, err := io.ReadAll(r.Body)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+
+			var problem Problem
+			err = json.Unmarshal(data, &problem)
+
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+
+			if err := createProblem(problem); err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+
+			defer r.Body.Close()
+			done <- true
+		}),
+	}
+
+	go func() {
+		<-done
+		if err := server.Shutdown(context.Background()); err != nil {
+			fmt.Println(err.Error())
+		}
+	}()
+
+	fmt.Println("Waiting for you...")
+	if err := server.ListenAndServe(); err != nil {
+		fmt.Println(err)
+	}
+
+	return nil
+}
+
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		data, err := io.ReadAll(r.Body)
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
+	var rootCmd = &cobra.Command{
+		Use:   "ru",
+		Short: "Parse problems, contests and run test.",
+	}
 
-		var problem Problem
-		err = json.Unmarshal(data, &problem)
+	var parseCmd = &cobra.Command{
+		Use:   "parse",
+		Short: "Parse a problem",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return startServerAndParse()
+		},
+	}
 
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
+	var testCmd = &cobra.Command{
+		Use:   "test",
+		Short: "Run tests",
+	}
 
-		if err := createProblem(problem); err != nil {
-			fmt.Println(err.Error())
-			return
-		}
+	rootCmd.AddCommand(parseCmd)
+	rootCmd.AddCommand(testCmd)
 
-		defer r.Body.Close()
-	})
-
-	fmt.Println("Listening on :6174")
-	if err := http.ListenAndServe(":6174", nil); err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 	}
 }
 
 func createProblem(problem Problem) error {
-	fmt.Printf("Creating problem: %s\n", problem.Name)
+	fmt.Printf("Creating problem: %s ", problem.Name)
 	// like A, B, C in Codeforces
 	problemNameInitial := problem.Name[0]
 
@@ -90,5 +135,6 @@ func createProblem(problem Problem) error {
 		}
 	}
 
+	fmt.Println("✔️")
 	return nil
 }
