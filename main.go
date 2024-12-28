@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"io"
 	"net/http"
@@ -221,12 +222,13 @@ func testProblem() error {
 		}
 
 		if bytes.Equal(output, outData) {
-			fmt.Println("PASSED")
+			color.Green("PASSED")
 		} else {
-			fmt.Println("FAILED")
-			fmt.Println("Correct:")
+			c := color.RGB(152, 152, 152) // gray
+			color.Red("FAILED\n")
+			c.Println("Correct:")
 			fmt.Println(string(outData))
-			fmt.Println("Your Output:")
+			c.Println("Your Output:")
 			fmt.Println(string(output))
 		}
 	}
