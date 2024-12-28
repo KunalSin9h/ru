@@ -85,16 +85,18 @@ func main() {
 	}
 
 	var parseCmd = &cobra.Command{
-		Use:   "parse",
-		Short: "Parse a problem",
+		Use:     "parse",
+		Aliases: []string{"p"},
+		Short:   "Parse a problem",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return startServerAndParse()
 		},
 	}
 
 	var testCmd = &cobra.Command{
-		Use:   "test",
-		Short: "Run tests",
+		Use:     "test",
+		Aliases: []string{"t"},
+		Short:   "Run tests",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return testProblem()
 		},
