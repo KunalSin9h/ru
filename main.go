@@ -180,9 +180,12 @@ func testProblem() error {
 	cppCmd := strings.TrimSuffix(string(data), "\n")
 	cppCmd = strings.TrimSpace(cppCmd)
 
+	cmds := strings.Split(cppCmd, " ")
+	cmds = append(cmds, fmt.Sprintf("%s.cpp", problemDir))
+
 	// compile program,
 	// C++ compile command
-	cmd := exec.Command(cppCmd, fmt.Sprintf("%s.cpp", problemDir))
+	cmd := exec.Command(cmds[0], cmds[1:]...)
 	cmd.Stdout = os.Stdout
 
 	if err := cmd.Start(); err != nil {
