@@ -2,14 +2,16 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/spf13/cobra"
 	"io"
 	"net/http"
 	"os"
-
-	"github.com/spf13/cobra"
+	"os/exec"
+	"strings"
 )
 
 type Test struct {
@@ -152,7 +154,83 @@ func createProblem(problem Problem) error {
 	return nil
 }
 
+var home string = os.Getenv("HOME")
+var configDir string = fmt.Sprintf("%s/.config/ru.conf", home)
+
 func testProblem() error {
+	fmt.Println("Running tests...")
+	dir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	dirs := strings.Split(dir, "/")
+
+	problemDir := dirs[len(dirs)-1]
+
+	if len(problemDir) != 1 {
+		return fmt.Errorf("error: you are not in a problem directory")
+	}
+
+	data, err := os.ReadFile(configDir)
+	if err != nil {
+		return err
+	}
+
+	cppCmd := strings.TrimSuffix(string(data), "\n")
+	cppCmd = strings.TrimSpace(cppCmd)
+
+	// compile program,
+	// C++ compile command
+	cmd := exec.Command(cppCmd, fmt.Sprintf("%s.cpp", problemDir))
+	cmd.Stdout = os.Stdout
+
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+	if err := cmd.Wait(); err != nil {
+		return err
+	}
+
+	// run tests cases
+	// with a.out
+
+	for i := 0; true; i++ {
+		inFile := fmt.Sprintf("in%d.txt", i)
+
+		outData, err := os.ReadFile(fmt.Sprintf("out%d.txt", i))
+		if err != nil {
+			// no such input file
+			// we are done
+			return nil
+		}
+
+		run := exec.Command("./a.out")
+
+		inData, err := os.Open(inFile)
+		if err != nil {
+			// no such input file
+			// we are done
+			return nil
+		}
+
+		run.Stdin = inData
+
+		output, err := run.Output()
+		if err != nil {
+			return err
+		}
+
+		if bytes.Equal(output, outData) {
+			fmt.Println("PASSED")
+		} else {
+			fmt.Println("FAILED")
+			fmt.Println("Correct:")
+			fmt.Println(string(outData))
+			fmt.Println("Your Output:")
+			fmt.Println(string(output))
+		}
+	}
+
 	return nil
 }
 
@@ -164,9 +242,6 @@ func configSetup() error {
 	if err != nil {
 		return err
 	}
-
-	home := os.Getenv("HOME")
-	configDir := fmt.Sprintf("%s/.config/ru.conf", home)
 
 	//os.Stat(configDir)
 	// create file
