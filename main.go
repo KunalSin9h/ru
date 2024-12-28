@@ -173,7 +173,7 @@ func testProblem() error {
 	problemDir := dirs[len(dirs)-1]
 
 	if len(problemDir) != 1 {
-		return fmt.Errorf("error: you are not in a problem directory")
+		return fmt.Errorf("you are not in a problem directory\n")
 	}
 
 	data, err := os.ReadFile(configDir)
