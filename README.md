@@ -8,6 +8,15 @@ Install
 go install github.com/kunalsin9h/ru@latest
 ```
 
+Config
+
+```bash
+ru config
+```
+
+Here add your C++ compile command (without `-o`)
+
+
 ```bash
 ru parse
 
