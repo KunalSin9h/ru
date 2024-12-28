@@ -15,6 +15,8 @@ import (
 	"strings"
 )
 
+var gray = color.RGB(152, 152, 152) // gray
+
 type Test struct {
 	Input  string `json:"input"`
 	Output string `json:"output"`
@@ -161,7 +163,7 @@ var home string = os.Getenv("HOME")
 var configDir string = fmt.Sprintf("%s/.config/ru.conf", home)
 
 func testProblem() error {
-	fmt.Println("Running tests...")
+	gray.Println("Running tests...")
 	dir, err := os.Getwd()
 	if err != nil {
 		return err
@@ -227,10 +229,10 @@ func testProblem() error {
 		}
 
 		if bytes.Equal(output, outData) {
-			color.Green("PASSED")
+			color.HiGreen("PASSED")
 		} else {
 			c := color.RGB(152, 152, 152) // gray
-			color.Red("FAILED\n")
+			color.HiRed("FAILED")
 			c.Println("Correct:")
 			fmt.Println(string(outData))
 			c.Println("Your Output:")
@@ -262,6 +264,6 @@ func configSetup() error {
 		return err
 	}
 
-	fmt.Printf("C++ compilation command saved to: %s\n", configDir)
+	color.Green("C++ compilation command saved to: %s\n", configDir)
 	return nil
 }
