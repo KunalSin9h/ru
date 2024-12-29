@@ -199,7 +199,7 @@ func testProblem() error {
 	// compile program,
 	// C++ compile command
 	cmd := exec.Command(cmds[0], cmds[1:]...)
-	//cmd.Stdout = os.Stdout
+	cmd.Stdout = os.Stdout
 
 	if err := cmd.Start(); err != nil {
 		return err
