@@ -6,13 +6,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/fatih/color"
-	"github.com/spf13/cobra"
 	"io"
 	"net/http"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/fatih/color"
+	"github.com/spf13/cobra"
 
 	"github.com/atotto/clipboard"
 )
