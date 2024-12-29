@@ -3,7 +3,6 @@ module github.com/kunalsin9h/ru
 go 1.23.4
 
 require (
-	github.com/atotto/clipboard v0.1.4
 	github.com/fatih/color v1.18.0
 	github.com/spf13/cobra v1.8.1
 )
