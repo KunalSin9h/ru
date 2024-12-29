@@ -14,6 +14,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+
+	"github.com/atotto/clipboard"
 )
 
 var gray = color.RGB(152, 152, 152) // gray
@@ -63,7 +65,7 @@ func main() {
 		},
 	}
 
-	testCmd.PersistentFlags().BoolVar(&copy, "copy", false, "Copy solution to clipboard")
+	testCmd.PersistentFlags().BoolVarP(&copy, "copy", "c", false, "Copy solution to clipboard")
 
 	rootCmd.AddCommand(parseCmd)
 	rootCmd.AddCommand(testCmd)
@@ -244,15 +246,9 @@ func testProblem() error {
 				if err != nil {
 					return err
 				}
-				/*				if err := clipboard.WriteAll(string(solutionSource)); err != nil {
-								return err
-							}*/
-				cpyCmd := exec.Command("xclip", "-selection", "clipboard")
-				cpyCmd.Stdin = bytes.NewReader(solutionSource)
-				if err := cpyCmd.Run(); err != nil {
+				if err := clipboard.WriteAll(string(solutionSource)); err != nil {
 					return err
 				}
-
 				gray.Println("Done")
 			}
 		} else {
