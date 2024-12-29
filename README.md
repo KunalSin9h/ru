@@ -42,3 +42,12 @@ ru test
 # or `ru t`
 ```
 
+Copy source when test passes
+
+```bash
+ru test --copy
+# or `ru t --copy`
+
+# this need clipboard utility like xclip
+```
+
