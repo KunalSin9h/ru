@@ -27,6 +27,47 @@ type Problem struct {
 	Tests []Test `json:"tests"`
 }
 
+func main() {
+	var rootCmd = &cobra.Command{
+		Use:   "ru",
+		Short: "Parse problems, contests and run test.",
+	}
+
+	var configCmd = &cobra.Command{
+		Use:   "config",
+		Short: "Setup compilation options",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return configSetup()
+		},
+	}
+
+	var parseCmd = &cobra.Command{
+		Use:     "parse",
+		Aliases: []string{"p"},
+		Short:   "Parse a problem",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return startServerAndParse()
+		},
+	}
+
+	var testCmd = &cobra.Command{
+		Use:     "test",
+		Aliases: []string{"t"},
+		Short:   "Run tests",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return testProblem()
+		},
+	}
+
+	rootCmd.AddCommand(parseCmd)
+	rootCmd.AddCommand(testCmd)
+	rootCmd.AddCommand(configCmd)
+
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+	}
+}
+
 func startServerAndParse() error {
 	done := make(chan bool)
 
@@ -70,47 +111,6 @@ func startServerAndParse() error {
 	}
 
 	return nil
-}
-
-func main() {
-	var rootCmd = &cobra.Command{
-		Use:   "ru",
-		Short: "Parse problems, contests and run test.",
-	}
-
-	var configCmd = &cobra.Command{
-		Use:   "config",
-		Short: "Setup compilation options",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return configSetup()
-		},
-	}
-
-	var parseCmd = &cobra.Command{
-		Use:     "parse",
-		Aliases: []string{"p"},
-		Short:   "Parse a problem",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return startServerAndParse()
-		},
-	}
-
-	var testCmd = &cobra.Command{
-		Use:     "test",
-		Aliases: []string{"t"},
-		Short:   "Run tests",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return testProblem()
-		},
-	}
-
-	rootCmd.AddCommand(parseCmd)
-	rootCmd.AddCommand(testCmd)
-	rootCmd.AddCommand(configCmd)
-
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-	}
 }
 
 func createProblem(problem Problem) error {
