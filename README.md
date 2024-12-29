@@ -47,6 +47,7 @@ Copy source when test passes
 ```bash
 ru test --copy
 # or `ru t --copy`
+# or `ru t -c`
 
 # this need clipboard utility like xclip
 ```
