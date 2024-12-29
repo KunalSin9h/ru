@@ -13,6 +13,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/atotto/clipboard"
 )
 
 var gray = color.RGB(152, 152, 152) // gray
@@ -26,6 +28,9 @@ type Problem struct {
 	Name  string `json:"name"`
 	Tests []Test `json:"tests"`
 }
+
+// Flag for copying code to clipboard
+var copy bool
 
 func main() {
 	var rootCmd = &cobra.Command{
@@ -58,6 +63,8 @@ func main() {
 			return testProblem()
 		},
 	}
+
+	testCmd.PersistentFlags().BoolVar(&copy, "copy", false, "Copy solution to clipboard")
 
 	rootCmd.AddCommand(parseCmd)
 	rootCmd.AddCommand(testCmd)
@@ -181,16 +188,18 @@ func testProblem() error {
 		return err
 	}
 
+	solutionFile := fmt.Sprintf("%s.cpp", problemDir)
+
 	cppCmd := strings.TrimSuffix(string(data), "\n")
 	cppCmd = strings.TrimSpace(cppCmd)
 
 	cmds := strings.Split(cppCmd, " ")
-	cmds = append(cmds, fmt.Sprintf("%s.cpp", problemDir))
+	cmds = append(cmds, solutionFile)
 
 	// compile program,
 	// C++ compile command
 	cmd := exec.Command(cmds[0], cmds[1:]...)
-	cmd.Stdout = os.Stdout
+	//cmd.Stdout = os.Stdout
 
 	if err := cmd.Start(); err != nil {
 		return err
@@ -222,20 +231,30 @@ func testProblem() error {
 		}
 
 		run.Stdin = inData
-
 		output, err := run.Output()
+
 		if err != nil {
 			return err
 		}
 
 		if bytes.Equal(output, outData) {
 			color.HiGreen("PASSED")
+			if copy {
+				gray.Print("Copying solution... ")
+				solutionSource, err := os.ReadFile(solutionFile)
+				if err != nil {
+					return err
+				}
+				if err := clipboard.WriteAll(string(solutionSource)); err != nil {
+					return err
+				}
+				gray.Println("Done")
+			}
 		} else {
-			c := color.RGB(152, 152, 152) // gray
 			color.HiRed("FAILED")
-			c.Println("Correct:")
+			gray.Println("Correct:")
 			fmt.Println(string(outData))
-			c.Println("Your Output:")
+			gray.Println("Your Output:")
 			fmt.Println(string(output))
 		}
 	}
