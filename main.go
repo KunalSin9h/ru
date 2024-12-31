@@ -163,7 +163,8 @@ func createProblem(problem Problem) error {
 		}
 	}
 
-	fmt.Println("✔️")
+	fmt.Println()
+
 	return nil
 }
 
@@ -211,7 +212,6 @@ func testProblem() error {
 
 	// run tests cases
 	// with a.out
-
 	for i := 0; true; i++ {
 		inFile := fmt.Sprintf("in%d.txt", i)
 
@@ -230,14 +230,20 @@ func testProblem() error {
 			// we are done
 			return nil
 		}
+		defer inData.Close()
 
 		run.Stdin = inData
-		output, err := run.Output()
+		var stdout, stderr bytes.Buffer
+		run.Stdout = &stdout
+		run.Stderr = &stderr
 
-		if err != nil {
+		if err := run.Run(); err != nil {
+			gray.Println(stdout.String())
+			color.Red(stderr.String())
 			return err
 		}
 
+		output := stdout.Bytes()
 		if bytes.Equal(output, outData) {
 			color.HiGreen("PASSED")
 			if copy {
