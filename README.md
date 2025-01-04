@@ -2,6 +2,13 @@
 
 A simple competitive programming problem parser and test runner.
 
+Parsing Features
+
+- [x] Problems
+- [ ] Contests
+
+This wokrs smoothly in Codeforces and Atcoder.
+
 Install
 
 ```bash
