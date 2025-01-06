@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+    "strconv"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -52,7 +53,20 @@ func main() {
 		Aliases: []string{"p"},
 		Short:   "Parse a problem",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return startServerAndParse()
+            // args is the number of problems to parse
+            // default to 1
+
+            var numberOfProblems = 1
+            var err error
+
+            if len(args) > 0 {
+                numberOfProblems, err = strconv.Atoi(args[0])
+                if err != nil {
+                    return err
+                }
+            }
+
+			return startServerAndParse(numberOfProblems)
 		},
 	}
 
@@ -76,8 +90,10 @@ func main() {
 	}
 }
 
-func startServerAndParse() error {
+func startServerAndParse(numberOfProblems int) error {
 	done := make(chan bool)
+
+    created := 0
 
 	server := &http.Server{
 		Addr: ":6174",
@@ -96,18 +112,22 @@ func startServerAndParse() error {
 				return
 			}
 
-			if err := createProblem(problem); err != nil {
-				fmt.Println(err.Error())
-				return
-			}
+            if err := createProblem(problem); err != nil {
+                fmt.Println(err.Error())
+                return
+            }
 
 			defer r.Body.Close()
-			done <- true
+
+            created += 1
+            if created == numberOfProblems {
+                done <- true
+            }
 		}),
 	}
 
 	go func() {
-		<-done
+        <-done
 		if err := server.Shutdown(context.Background()); err != nil {
 			fmt.Println(err.Error())
 		}

@@ -5,7 +5,7 @@ A simple competitive programming problem parser and test runner.
 Parsing Features
 
 - [x] Problems
-- [ ] Contests
+- [x] Contests
 
 This wokrs smoothly in Codeforces and Atcoder.
 
@@ -57,5 +57,14 @@ ru test --copy
 # or `ru t -c`
 
 # this need clipboard utility like xclip
+```
+
+Parsing Contests
+
+When parsing contest we need to give the `number-or-problems` argument to the `parse` command
+
+```bash
+ru parse 6
+# this will parse 6 problems from contest
 ```
 
